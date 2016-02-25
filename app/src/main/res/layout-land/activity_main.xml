@@ -13,9 +13,8 @@
         android:text="Subscribed channels"
         android:id="@+id/labelState"
         android:textSize="18dp"
-        android:layout_below="@+id/button"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_below="@+id/textView6"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,9 +22,10 @@
         android:text="unknown"
         android:id="@+id/State"
         android:textSize="18dp"
-        android:layout_below="@+id/labelState"
-        android:layout_alignStart="@+id/labelState"
-        android:layout_alignEnd="@+id/labelState" />
+        android:layout_alignEnd="@+id/State1"
+        android:layout_alignTop="@+id/labelState"
+        android:layout_toEndOf="@+id/labelState"
+        android:layout_marginLeft="16dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -33,8 +33,8 @@
         android:text="Auth state"
         android:id="@+id/labelState1"
         android:textSize="18dp"
-        android:layout_alignTop="@+id/btnListenRand"
-        android:layout_toEndOf="@+id/btnListenRand" />
+        android:layout_below="@+id/labelState"
+        android:layout_alignStart="@+id/labelState" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,9 +42,10 @@
         android:text="unknown"
         android:id="@+id/State1"
         android:textSize="18dp"
-        android:layout_below="@+id/labelState1"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/btnListenRand" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/labelState1" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -54,7 +55,7 @@
         android:layout_marginLeft="16dp"
         android:textSize="18dp"
         android:layout_alignTop="@+id/btnDisconnect"
-        android:layout_toEndOf="@+id/btnDisconnect" />
+        android:layout_toEndOf="@+id/btnUnSubWeather" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -120,7 +121,8 @@
         android:text="Connect"
         android:id="@+id/btnConnect"
         android:layout_below="@+id/textHost"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/btnUnSubWeather" />
 
     <Button
         android:layout_width="wrap_content"
@@ -128,16 +130,15 @@
         android:text="Disconnect"
         android:id="@+id/btnDisconnect"
         android:layout_below="@+id/textHost"
-        android:layout_toEndOf="@+id/btnConnect" />
+        android:layout_alignEnd="@+id/btnUnSubWeather" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:id="@+id/btnListenRand"
-        android:layout_alignBaseline="@+id/btnPubWeather"
-        android:layout_alignBottom="@+id/btnPubWeather"
-        android:layout_toEndOf="@+id/State2" />
+        android:id="@+id/loginBtn"
+        android:layout_alignTop="@+id/btnPubWeather"
+        android:layout_toEndOf="@+id/btnPubWeather" />
 
     <Button
         android:layout_width="wrap_content"
@@ -160,7 +161,7 @@
         android:layout_height="wrap_content"
         android:text="Publish  to channel"
         android:id="@+id/btnPubWeather"
-        android:layout_above="@+id/labelState"
+        android:layout_alignTop="@+id/button"
         android:layout_toEndOf="@+id/button" />
 
     <Button
@@ -169,7 +170,7 @@
         android:text="Subscribed"
         android:id="@+id/button"
         android:layout_alignTop="@+id/btnUnSubWeather"
-        android:layout_alignStart="@+id/labelState2" />
+        android:layout_toEndOf="@+id/btnUnSubWeather" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -177,8 +178,9 @@
         android:id="@+id/channel"
         android:text="WEATHER"
         android:textSize="18dp"
-        android:layout_toEndOf="@+id/button"
-        android:layout_below="@+id/labelState2" />
+        android:layout_below="@+id/labelState2"
+        android:layout_alignEnd="@+id/textPort"
+        android:layout_alignStart="@+id/State2" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -187,6 +189,26 @@
         android:id="@+id/textView"
         android:textSize="18dp"
         android:layout_above="@+id/button"
-        android:layout_alignStart="@+id/button" />
+        android:layout_alignStart="@+id/button"
+        android:layout_marginLeft="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message"
+        android:id="@+id/textView6"
+        android:textSize="18dp"
+        android:layout_alignBottom="@+id/message"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/message"
+        android:text="message to publish"
+        android:textSize="14dp"
+        android:layout_alignEnd="@+id/loginBtn"
+        android:layout_toEndOf="@+id/btnSubWeather"
+        android:layout_below="@+id/loginBtn" />
 
 </RelativeLayout>

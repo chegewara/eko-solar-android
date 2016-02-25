@@ -122,8 +122,7 @@ connectWebViewJavascriptBridge(function(bridge) {
      */
     bridge.registerHandler("offEventHandler", function(data) {
         data = JSON.parse(data);
-        var eventName = data.event;
-        scProxy.off(eventName);
+        scProxy.off(data.event);
     });
 
     /**
@@ -175,40 +174,40 @@ connectWebViewJavascriptBridge(function(bridge) {
         scProxy.unsubscribe(channelName);
     });
 
+    /**
+     *  scSocket.emit handler
+     */
     bridge.registerHandler("emitEventHandler", function(data) {
         data = JSON.parse(data);
-        var eventName = data.event;
-        scProxy.emit(eventName, data.data);
+        scProxy.emit(data.event, data.data);
     });
 
     /**
      *  scSocket.deauthenticate handler
      */
-    bridge.registerHandler("deauthenticateHandler", function(data) {
+    bridge.registerHandler("deauthenticateHandler", function() {
         scProxy.deauthenticate();
     });
 
     /**
      * scSocket.getState handler
      */
-    bridge.registerHandler("getStateHandler", function(data, callback) {
+    bridge.registerHandler("getStateHandler", function() {
         var state = scProxy.getState();
-        callback(state);
+        bridge.callHandler('onGetStateHandler', JSON.stringify(state));
     });
 
     /**
-     * scSocket.getState handler
+     * scSocket.subscriptions handler
      */
-    bridge.registerHandler("subscriptionsHandler", function(data, callback) {
-        var state = scProxy.subscriptions();
-        callback(state);
+    bridge.registerHandler("subscriptionsHandler", function(includePending) {
+        var state = scProxy.subscriptions(includePending);
+        bridge.callHandler('onSubscribeStateChangeHandler', JSON.stringify(state));
     });
-
     /**
      *  scSocket.authenticate handler
      */
     bridge.registerHandler("authenticateHandler", function(data) {
-        var authToken = JSON.parse(data).authToken;
         scProxy.authenticate(data);
     });
 

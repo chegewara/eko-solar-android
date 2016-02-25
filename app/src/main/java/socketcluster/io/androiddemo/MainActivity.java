@@ -30,7 +30,6 @@ import socketcluster.io.socketclusterandroidclient.SCSocketService;
 public class MainActivity extends Activity implements ISocketCluster {
 
     private static String TAG = "SCDemo";
-    private String authToken = null;
     private SCSocketService sc;
     private Boolean bound = false;
     private TextView subState;
@@ -43,14 +42,17 @@ public class MainActivity extends Activity implements ISocketCluster {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(savedInstanceState != null){
-            this.authToken = savedInstanceState.getString("authToken");
-            options = savedInstanceState.getString("options");
-        }
-
         // Connect button
         final Button connectBtn = (Button) findViewById(R.id.btnConnect);
+        final Button subsBtn = (Button) findViewById(R.id.button);
         final CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+
+        subsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sc.subscriptions(true);
+            }
+        });
 
         connectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +66,6 @@ public class MainActivity extends Activity implements ISocketCluster {
                 map.put("hostname", host);
                 map.put("secure", isHttps);
                 map.put("port", port);
-                map.put("rejectUnauthorized", false);
                 options = JSONValue.toJSONString(map);
                 sc.connect(options);
                 sc.getState();
@@ -79,8 +80,8 @@ public class MainActivity extends Activity implements ISocketCluster {
             }
         });
         // Listen to Rand event button handler
-        final Button listenToRandBtn = (Button) findViewById(R.id.btnListenRand);
-        listenToRandBtn.setOnClickListener(new View.OnClickListener() {
+        final Button loginBtn = (Button) findViewById(R.id.loginBtn);
+        loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sc.emitEvent("login", "test");
@@ -92,7 +93,7 @@ public class MainActivity extends Activity implements ISocketCluster {
             @Override
             public void onClick(View view) {
                 String channel = ((EditText) findViewById(R.id.channel)).getText().toString();
-                sc.subscribeToChannel(channel);
+                sc.subscribe(channel);
             }
         });
         final Button unSubToWeatherBtn = (Button) findViewById(R.id.btnUnSubWeather);
@@ -100,7 +101,7 @@ public class MainActivity extends Activity implements ISocketCluster {
             @Override
             public void onClick(View view) {
                 String channel = ((EditText) findViewById(R.id.channel)).getText().toString();
-                sc.unsubscribeFromChannel(channel);
+                sc.unsubscribe(channel);
             }
         });
 
@@ -109,7 +110,8 @@ public class MainActivity extends Activity implements ISocketCluster {
             @Override
             public void onClick(View view) {
                 String channel = ((EditText) findViewById(R.id.channel)).getText().toString();
-                sc.publishToChannel(channel, "CLOUDY");
+                String msg = ((EditText) findViewById(R.id.message)).getText().toString();
+                sc.publish(channel, msg);
             }
         });
 
@@ -136,17 +138,11 @@ public class MainActivity extends Activity implements ISocketCluster {
     };
 
     @Override
-    protected void onSaveInstanceState(Bundle savedInstanceState){
-        savedInstanceState.putString("authToken", authToken);
-        savedInstanceState.putString("options", options);
-    }
-
-    @Override
     protected void onStart(){
    		super.onStart();
    		Intent intent = new Intent(this, SCSocketService.class);
    		bindService(intent, conn, Context.BIND_AUTO_CREATE);
-	        startService(intent);
+        startService(intent);
     }
 
     @Override
@@ -208,13 +204,6 @@ public class MainActivity extends Activity implements ISocketCluster {
 
     @Override
     public void socketClusterDidConnect(String data) {
-        String id = "";
-        try {
-            JSONObject obj = new JSONObject(data).getJSONObject("data");
-            id = obj.getString("id");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         Log.i(TAG, "SocketClusterDidConnect");
     }
 
@@ -236,13 +225,11 @@ public class MainActivity extends Activity implements ISocketCluster {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.i(TAG, "socketClusterOnKickOut");
+        Log.i(TAG, "socketClusterOnKickOut from channel: " + channel);
     }
 
     @Override
     public void socketClusterOnSubscribe() {
-        String data = sc.subscriptions(true);
-        subState.setText(data);
         Log.i(TAG, "socketClusterOnSubscribe");
     }
 
@@ -257,7 +244,6 @@ public class MainActivity extends Activity implements ISocketCluster {
 
     @Override
     public void socketClusterOnAuthenticate(String data) {
-        authToken = data;
     }
 
     @Override
@@ -266,12 +252,12 @@ public class MainActivity extends Activity implements ISocketCluster {
 
     @Override
     public void socketClusterOnGetState(String state) {
+        connState.setText(state);
     }
 
 	@Override
 	public void socketClusterOnSubscribeStateChange(String state) {
-        String data = sc.subscriptions(true);
-        subState.setText(data);
+        subState.setText(state);
 	}
 
 	@Override

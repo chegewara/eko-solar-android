@@ -5,4 +5,6 @@ This project is working in progress, please read ``MainActivity.java`` for exist
 feedbacks are welcome.
 
 
-Project on basis ilani project. Updated to SocketCluster client version 4.3. Handling for most events and methods.
+Project on basis ilani project. Updated to SocketCluster client version 4.3.
+As for now android is able to handle most of events and methods from scSocket client.
+

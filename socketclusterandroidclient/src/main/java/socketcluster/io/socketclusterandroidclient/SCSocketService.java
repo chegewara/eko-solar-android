@@ -7,23 +7,16 @@ import android.os.IBinder;
 import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
 import com.fangjian.WebViewJavascriptBridge;
 
-import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-
-import java.io.InputStream;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class SCSocketService extends Service {
-    private String host;
-    private String port;
-    private Boolean isHttps;
     private WebView webView;
     private WebViewJavascriptBridge bridge;
     private ISocketCluster socketClusterDelegate;
@@ -35,12 +28,12 @@ public class SCSocketService extends Service {
     		public SCSocketService getBinder(){
     			return SCSocketService.this;
     		}
-    };
+    }
     
     @Override
     public IBinder onBind(Intent intent){
     		return binder;
-    };
+    }
     @Override
     public void onCreate(){
     }
@@ -76,7 +69,6 @@ public class SCSocketService extends Service {
                     }
                 });
         webView.loadUrl("file:///android_asset/user_client.html");
-
     }
     
     private void registerHandles(){
@@ -125,7 +117,7 @@ public class SCSocketService extends Service {
 
 		/**
          *  'subscribeFail' event handler
-         *  @data - error
+         *  @param data - error
          */
         bridge.registerHandler("onSubscribeFailHandler", new WebViewJavascriptBridge.WVJBHandler() {
             @Override
@@ -136,7 +128,7 @@ public class SCSocketService extends Service {
 
 		/**
          *  'authenticate' event handler
-         *  @data - authToken
+         *  @param data - authToken
          */
         bridge.registerHandler("onAuthenticateHandler", new WebViewJavascriptBridge.WVJBHandler(){
 
@@ -158,6 +150,7 @@ public class SCSocketService extends Service {
 
 		/**
          *  'unsubscribe' event handler
+         *  @param data channel name
          */
         bridge.registerHandler("onUnsubscribeHandler", new WebViewJavascriptBridge.WVJBHandler() {
             @Override
@@ -167,7 +160,17 @@ public class SCSocketService extends Service {
         });
 
 		/**
-         *
+         *  handle returned state from getState
+         */
+        bridge.registerHandler("onGetStateHandler", new WebViewJavascriptBridge.WVJBHandler() {
+            @Override
+            public void handle(String data, WebViewJavascriptBridge.WVJBResponseCallback jsCallback) {
+                socketClusterDelegate.socketClusterOnGetState(data);
+            }
+        });
+
+        /**
+         *  'authChangeState' event handler
          */
         bridge.registerHandler("onAuthStateChangeHandler", new WebViewJavascriptBridge.WVJBHandler() {
             @Override
@@ -176,8 +179,8 @@ public class SCSocketService extends Service {
             }
         });
 
-		/**
-         *
+        /**
+         *  'subscribeStateChange' event handler
          */
         bridge.registerHandler("onSubscribeStateChangeHandler", new WebViewJavascriptBridge.WVJBHandler() {
             @Override
@@ -261,8 +264,8 @@ public class SCSocketService extends Service {
     
     /**
      *  Call scSocket.emit
-     *  @eventName
-     *  @data
+     *  @param eventName
+     *  @param eventData
      */
     public void emitEvent(String eventName, String eventData) {
 
@@ -287,7 +290,8 @@ public class SCSocketService extends Service {
     }
 
     /**
-     *  Call scSocket.on(event)
+     *  Call scSocket.off(event)
+     *  @param eventName
      */
     public void unregisterEvent(String eventName) {
         Map data = new HashMap();
@@ -298,10 +302,10 @@ public class SCSocketService extends Service {
 
     /**
      *  Call scSocket.publish 
-     *  @channelName 
-     *  @eventData
+     *  @param channelName
+     *  @param eventData
      */
-    public void publishToChannel(String channelName, String eventData) {
+    public void publish(String channelName, String eventData) {
         Map data = new HashMap();
         data.put("channel", channelName);
         data.put("data", eventData);
@@ -311,9 +315,9 @@ public class SCSocketService extends Service {
     
     /**
      *  Call scSocket.subscribe
-     *  @channelName
+     *  @param channelName
      */
-    public void subscribeToChannel(String channelName) {
+    public void subscribe(String channelName) {
         Map data = new HashMap();
         data.put("channel", channelName);
         String jsonText = JSONValue.toJSONString(data);
@@ -322,9 +326,9 @@ public class SCSocketService extends Service {
     
     /**
      *  Call scSocket.unsubscribe
-     *  @channelName
+     *  @param channelName
      */
-    public void unsubscribeFromChannel(String channelName) {
+    public void unsubscribe(String channelName) {
         Map data = new HashMap();
         data.put("channel", channelName);
         String jsonText = JSONValue.toJSONString(data);
@@ -333,12 +337,9 @@ public class SCSocketService extends Service {
     
     /**
      *  Call scSocket.authenticate
-     *  @authToken 
+     *  @param authToken
      */
     public void authenticate(String authToken) {
-        Map map = new HashMap();
-        map.put("authToken", authToken);
-        String jsonText = JSONValue.toJSONString(map);
         bridge.callHandler("authenticateHandler", authToken);
     }
     
@@ -353,42 +354,18 @@ public class SCSocketService extends Service {
      * Call scSocket.getState
      */
     public void getState(){
-    	bridge.callHandler("getStateHandler", null, new WebViewJavascriptBridge.WVJBResponseCallback() {
-            @Override
-            public void callback(String data) {
-                socketClusterDelegate.socketClusterOnGetState(data);
-            }
-        });
+    	bridge.callHandler("getStateHandler");
     }
 
     /**
      *  Call scSocket.subscriptions
-     *  @pending
+     *  @param pending
      */
-    public String subscriptions(Boolean pending){
-        final String[] d = {null};
+    public void subscriptions(Boolean pending){
         Map map = new HashMap();
         map.put("pending", pending.toString());
         String jsonText = JSONValue.toJSONString(map);
-    	bridge.callHandler("subscriptionsHandler", jsonText, new WebViewJavascriptBridge.WVJBResponseCallback() {
-            @Override
-            public void callback(String data) {
-                d[0] = data;
-            }
-        });
-        return d[0];
+    	bridge.callHandler("subscriptionsHandler", jsonText);
     }
-    
-    /**
-     *  Call scSocket.isSubscribed
-     *  @channel
-     *  @pending
-     */
-    public void isSubscribed(String channel, Boolean pending){
-        Map map = new HashMap();
-        map.put("channel", channel);
-        map.put("pending", pending.toString());
-        String jsonText = JSONValue.toJSONString(map);    
-    	bridge.callHandler("isSubscribedHandler", jsonText);
-    }
+
 }

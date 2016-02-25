@@ -32,8 +32,8 @@
         android:text="Auth key"
         android:id="@+id/labelState1"
         android:textSize="18dp"
-        android:layout_alignTop="@+id/btnListenRand"
-        android:layout_toEndOf="@+id/btnListenRand" />
+        android:layout_below="@+id/btnDisconnect"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -42,8 +42,8 @@
         android:id="@+id/State1"
         android:textSize="18dp"
         android:layout_below="@+id/labelState1"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/btnListenRand" />
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/checkBox" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -133,10 +133,10 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Authenticate"
-        android:id="@+id/btnListenRand"
-        android:layout_below="@+id/btnDisconnect"
-        android:layout_alignParentStart="true" />
+        android:text="Login"
+        android:id="@+id/loginBtn"
+        android:layout_alignTop="@+id/btnDisconnect"
+        android:layout_toEndOf="@+id/btnDisconnect" />
 
     <Button
         android:layout_width="wrap_content"
@@ -177,7 +177,9 @@
         android:text="WEATHER"
         android:textSize="18dp"
         android:layout_alignTop="@+id/btnSubWeather"
-        android:layout_alignEnd="@+id/State1" />
+        android:layout_alignEnd="@+id/State2"
+        android:layout_above="@+id/btnUnSubWeather"
+        android:layout_toEndOf="@+id/loginBtn" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -186,6 +188,25 @@
         android:id="@+id/textView4"
         android:textSize="18dp"
         android:layout_centerVertical="true"
-        android:layout_alignStart="@+id/State1" />
+        android:layout_toEndOf="@+id/btnUnSubWeather" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message"
+        android:id="@+id/textView5"
+        android:textSize="18dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/channel" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/message"
+        android:text="message to publish"
+        android:textSize="18dp"
+        android:layout_above="@+id/btnUnSubWeather"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textView5" />
 
 </RelativeLayout>
