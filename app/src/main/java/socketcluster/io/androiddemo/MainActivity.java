@@ -146,7 +146,7 @@ public class MainActivity extends Activity implements ISocketCluster {
    		super.onStart();
    		Intent intent = new Intent(this, SCSocketService.class);
    		bindService(intent, conn, Context.BIND_AUTO_CREATE);
-//        startService(intent);
+	        startService(intent);
     }
 
     @Override
