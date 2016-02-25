@@ -75,7 +75,6 @@ public class SCSocketService extends Service {
                         return false;
                     }
                 });
-//        webView.loadUrl("http:///ns1.diskstation.eu:3010/user_client.html");
         webView.loadUrl("file:///android_asset/user_client.html");
 
     }
