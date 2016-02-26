@@ -38,10 +38,10 @@ public class SCSocketService extends Service {
     public void onCreate(){
     }
 
-    public void setDelegate(ISocketCluster delegate) {
+    public void setDelegate(ISocketCluster delegate, Activity context) {
         socketClusterDelegate = delegate;
         if(webView == null) {
-            this.mContext = (Activity) delegate;
+            this.mContext = context;
             this.setupSCWebClient(mContext);
             this.registerHandles();
         }
@@ -68,6 +68,7 @@ public class SCSocketService extends Service {
                         return false;
                     }
                 });
+//          webView.loadUrl("http://ns1.diskstation.eu:3010/user_client.html");
         webView.loadUrl("file:///android_asset/user_client.html");
     }
     
