@@ -200,9 +200,9 @@ connectWebViewJavascriptBridge(function(bridge) {
     /**
      * scSocket.subscriptions handler
      */
-    bridge.registerHandler("subscriptionsHandler", function(includePending) {
+    bridge.registerHandler("subscriptionsHandler", function(includePending, callback) {
         var state = scProxy.subscriptions(includePending);
-        bridge.callHandler('onSubscribeStateChangeHandler', JSON.stringify(state));
+        callback(JSON.stringify(state));
     });
     /**
      *  scSocket.authenticate handler
@@ -214,4 +214,5 @@ connectWebViewJavascriptBridge(function(bridge) {
     bridge.init(function(message) {
     });
 
+    bridge.callHandler('readyHandler');
 });

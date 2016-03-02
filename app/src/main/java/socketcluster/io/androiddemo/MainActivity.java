@@ -1,14 +1,18 @@
 package socketcluster.io.androiddemo;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -17,17 +21,26 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import socketcluster.io.socketclusterandroidclient.ISocketCluster;
-import socketcluster.io.socketclusterandroidclient.SCSocketService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.JSONValue;
 
-  
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.socketcluster.socketclusterandroidclient.SCSocketService;
+
+
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     private static String TAG = "SCDemo";
-    private SCSocketService sc;
+    private SCSocketService scSocket;
     private Boolean bound = false;
     private LocationManager locationManager;
     private Intent chatheadService;
+    private String options;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +49,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         chatheadService = new Intent(getApplicationContext(), ChatHeadService.class);
         startService(chatheadService);
 
+        Map map = new HashMap();
+
+        String host = "ns1.diskstation.eu";
+        String port = "3010";
+        map.put("hostname", host);
+        map.put("port", port);
+        options = JSONValue.toJSONString(map);
+
         /********** get Gps location service LocationManager object ***********/
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        /* CAL METHOD requestLocationUpdates */
-
+        /** CAL METHOD requestLocationUpdates */
+        /**
         // Parameters :
         //   First(provider)    :  the name of the provider with which to register
         //   Second(minTime)    :  the minimum time interval for notifications,
@@ -49,11 +70,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         //   Third(minDistance) :  the minimum distance interval for notifications, in meters
         //   Fourth(listener)   :  a {#link LocationListener} whose onLocationChanged(Location)
         //                         method will be called for each location update
-
+        */
 
         locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER,
-                1500,   // 3 sec
-                20, this);
+                0,   // 3 sec
+                10, this);
 
         /********* After registration onLocationChanged method  ********/
         /********* called periodically after each 3 sec ***********/
@@ -65,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         subsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sc.subscriptions(true);
+                scSocket.subscriptions(true);
             }
         });
 
@@ -79,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         disconnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sc.disconnect();
+                scSocket.disconnect();
             }
         });
         // Listen to Rand event button handler
@@ -87,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sc.emitEvent("login", "test");
+                scSocket.emitEvent("login", "test");
             }
         });
 
@@ -114,31 +135,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private ServiceConnection conn = new ServiceConnection(){
 
-    		@Override
-    		public void onServiceConnected(ComponentName component, IBinder binder){
-    			SCSocketService.SCSocketBinder scSocketBinder = (SCSocketService.SCSocketBinder) binder;
-    			sc = scSocketBinder.getBinder();
-                sc.setDelegate(new SCSocketHandler(), MainActivity.this);
-                bound = true;
-    		}
+        @Override
+        public void onServiceConnected(ComponentName component, IBinder binder){
+            SCSocketService.SCSocketBinder scSocketBinder = (SCSocketService.SCSocketBinder) binder;
+            scSocket = scSocketBinder.getBinder();
+            scSocket.setDelegate(MainActivity.this);
+            bound = true;
+        }
 
-    		@Override
-    		public void onServiceDisconnected(ComponentName component){
-    			bound = false;
-    		}
+        @Override
+        public void onServiceDisconnected(ComponentName component){
+            bound = false;
+        }
     };
 
     @Override
     protected void onStart(){
-   		super.onStart();
-   		Intent intent = new Intent(this, SCSocketService.class);
-   		bindService(intent, conn, Context.BIND_AUTO_CREATE);
-//        startService(intent);
+        super.onStart();
+        Intent intent1 = new Intent(this, SCSocketService.class);
+        bindService(intent1, conn, Context.BIND_AUTO_CREATE);
+        startService(intent1);
     }
 
     @Override
     protected void onStop(){
-   		super.onStop();
+        super.onStop();
         if(bound){
             unbindService(conn);
             bound = false;
@@ -148,18 +169,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onResume(){
         super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("io.socketcluster.eventsreceiver"));
     }
 
     @Override
     protected void onPause(){
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
         super.onPause();
     }
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        sc.deauthenticate();
-        stopService(chatheadService);
+        scSocket.deauthenticate();
+        //stopService(chatheadService);
     }
 
     @Override
@@ -195,9 +219,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onLocationChanged(Location location) {
 
-        sc.emitEvent("location", "{lat :"+ location.getLatitude()+", lng:" +location.getLongitude()+"}");
-    //    this.lat = location.getLatitude();
-    //    this.lng = location.getLongitude();
+        scSocket.publish("location", "{lat :" + location.getLatitude() + ", lng:" + location.getLongitude() + "}");
+        //    this.lat = location.getLatitude();
+        //    this.lng = location.getLongitude();
 
         //TODO wysłać  pozycję do bazy danych
     }
@@ -247,72 +271,102 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    /**
+     * BroadcastReceiver to receive messages from SCSocketClusterService to handle events
+     * Broadcast receiver can be changed or even implemented at new class but has to be to handle events from socketcluster client
+     */
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 
-    public class SCSocketHandler implements ISocketCluster {
         @Override
-        public void socketClusterReceivedEvent(String name, String data) {
-            Log.i(TAG, "ReceivedEvent " + name);
-            Log.i(TAG, "ReceivedEvent " + data);
+        public void onReceive(Context context, Intent intent) {
+            String event = intent.getStringExtra("event");
+            String data = intent.getStringExtra("data");
+            handleEvents(event,data);
         }
+    };
 
-        @Override
-        public void socketClusterChannelReceivedEvent(String name, String data) {
-            Log.i(TAG, "socketClusterChannelReceivedEvent " + name + " data: " + data);
-        }
 
-        @Override
-        public void socketClusterDidConnect(String data) {
-            Log.i(TAG, "SocketClusterDidConnect");
-        }
+    public void handleEvents(String event, String data) {
+        switch(event){
 
-        @Override
-        public void socketClusterDidDisconnect() {
-            Log.i(TAG, "socketClusterDidDisconnect");
-        }
+            default:
+                break;
 
-        @Override
-        public void socketClusterOnError(String error) {
-            Log.i(TAG, "socketClusterOnError");
-        }
+            case SCSocketService.EVENT_ON_READY:
+                scSocket.connect(options);
+                Log.d(TAG, "ready");
+                break;
 
-        @Override
-        public void socketClusterOnKickOut(String data) {
-            Log.i(TAG, "socketClusterOnKickOut from channel: ");
-        }
+            case SCSocketService.EVENT_ON_CONNECT:
+                scSocket.emitEvent("login", "Test Driver");
+                scSocket.subscribe("driverJob");
+                Log.d(TAG, "connected: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnSubscribe() {
-            Log.i(TAG, "socketClusterOnSubscribe");
-        }
+            case SCSocketService.EVENT_ON_DISCONNECT:
+                //  if(!logout)
+                //    scSocket.authenticate(authToken);
+                Log.d(TAG, "disconnected");
+                break;
 
-        @Override
-        public void socketClusterOnSubscribeFail(String err) {
-            Log.i(TAG, "socketClusterOnSubscribeFail");
-        }
+            case SCSocketService.EVENT_ON_EVENT_MESSAGE:
+                Log.d(TAG, "onEvent: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnUnsubscribe() {
-            Log.i(TAG, "socketClusterOnUnsubscribe");
-        }
+            case SCSocketService.EVENT_ON_SUBSCRIBED_MESSAGE:
+                JSONObject jsonObject = null;
+                String channel;
+                String text;
+                try {
+                    jsonObject = new JSONObject(data);
+                    channel = jsonObject.getString("channel");
+                    text = jsonObject.getString("data");
+                    String afterDecode = URLDecoder.decode(text, "UTF-8");
+                    Uri uri = Uri.parse(afterDecode);
+                    String contact = uri.getQueryParameter("contact");
+                    Log.d(TAG,jsonObject.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "subscribed message: "+jsonObject);
+                break;
 
-        @Override
-        public void socketClusterOnAuthenticate(String data) {
-        }
+            case SCSocketService.EVENT_ON_AUTHENTICATE_STATE_CHANGE:
+                Log.d(TAG, "authStateChanged: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnDeauthenticate() {
-        }
+            case SCSocketService.EVENT_ON_SUBSCRIBE_STATE_CHANGE:
+                Log.d(TAG, "subscribeStateChanged: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnGetState(String state) {
-        }
+            case SCSocketService.EVENT_ON_ERROR:
+                Log.d(TAG, "error: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnSubscribeStateChange(String state) {
-        }
+            case SCSocketService.EVENT_ON_SUBSCRIBE_FAIL:
+                Log.d(TAG, "subscribeFailed: "+data);
+                break;
 
-        @Override
-        public void socketClusterOnAuthStateChange(String state) {
+            case SCSocketService.EVENT_ON_AUTHENTICATE:
+                //authToken = data;
+                Log.d(TAG, "authenticated: ");
+                break;
+
+            case SCSocketService.EVENT_ON_DEAUTHENTICATE:
+                Log.d(TAG, "error: "+data);
+                break;
+
+            case SCSocketService.EVENT_ON_SUBSCRIBE:
+                Log.d(TAG, "error: "+data);
+                break;
+
+            case SCSocketService.EVENT_ON_UNSUBSCRIBE:
+                Log.d(TAG, "error: "+data);
+                break;
+
         }
     }
+
 }

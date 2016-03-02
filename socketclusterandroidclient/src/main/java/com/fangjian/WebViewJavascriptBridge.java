@@ -2,11 +2,14 @@ package com.fangjian;
 import android.app.Activity;
 import android.os.Build;
 import android.util.Log;
-import android.webkit.*;
-import android.widget.Toast;
+import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
 import org.json.JSONObject;
-
-
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +81,7 @@ public class WebViewJavascriptBridge {
         @Override
         public boolean onConsoleMessage(ConsoleMessage cm) {
             Log.d("console.log: ", cm.message()
-                    +" line:"+ cm.lineNumber()
+                            +" line:"+ cm.lineNumber()
             );
             return true;
         }
@@ -106,7 +109,7 @@ public class WebViewJavascriptBridge {
         }
         @Override
         public void callback(String data) {
-               _callbackJs(callbackIdJs,data);
+            _callbackJs(callbackIdJs,data);
         }
     }
 
@@ -145,12 +148,7 @@ public class WebViewJavascriptBridge {
                 handler = _messageHandler;
             }
             try {
-                mContext.runOnUiThread(new Runnable(){
-                    @Override
-                    public void run() {
-                        handler.handle(data, responseCallback);
-                    }
-                });
+                handler.handle(data, responseCallback);
             }catch (Exception exception) {
                 Log.e("test","WebViewJavascriptBridge: WARNING: java handler threw. "+exception.getMessage());
             }
@@ -182,12 +180,12 @@ public class WebViewJavascriptBridge {
     private void _dispatchMessage(Map <String, String> message){
         String messageJSON = new JSONObject(message).toString();
         Log.d("_dispatchMessageWVJB","sending:"+messageJSON);
-       final  String javascriptCommand =
+        final  String javascriptCommand =
                 String.format("javascript:WebViewJavascriptBridge3._handleMessageFromJava('%s');",doubleEscapeString(messageJSON));
         mContext.runOnUiThread(new Runnable(){
             @Override
             public void run() {
-                mWebView.loadUrl(javascriptCommand);    
+                mWebView.loadUrl(javascriptCommand);
             }
         });
     }
@@ -197,7 +195,7 @@ public class WebViewJavascriptBridge {
     }
     @JavascriptInterface
     public void callHandler(String handlerName,String data) {
-        callHandler(handlerName, data,null);
+        callHandler(handlerName, data, null);
     }
     @JavascriptInterface
     public void callHandler(String handlerName,String data,WVJBResponseCallback responseCallback){
@@ -213,14 +211,14 @@ public class WebViewJavascriptBridge {
       * http://www.json.org/
     */
     private String doubleEscapeString(String javascript) {
-      String result;
-      result = javascript.replace("\\", "\\\\");
-      result = result.replace("\"", "\\\"");
-      result = result.replace("\'", "\\\'");
-      result = result.replace("\n", "\\n");
-      result = result.replace("\r", "\\r");
-      result = result.replace("\f", "\\f");
-     return result;
+        String result;
+        result = javascript.replace("\\", "\\\\");
+        result = result.replace("\"", "\\\"");
+        result = result.replace("\'", "\\\'");
+        result = result.replace("\n", "\\n");
+        result = result.replace("\r", "\\r");
+        result = result.replace("\f", "\\f");
+        return result;
     }
 
 }

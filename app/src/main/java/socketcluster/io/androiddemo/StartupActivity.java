@@ -1,94 +1,44 @@
 package socketcluster.io.androiddemo;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-
-import com.fangjian.WebViewJavascriptBridge;
-
-import org.json.simple.JSONValue;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import socketcluster.io.socketclusterandroidclient.ISocketCluster;
-import socketcluster.io.socketclusterandroidclient.SCSocketService;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 
 public class StartupActivity extends AppCompatActivity {
 
     private static String TAG = "SCDemo";
-    private SCSocketService sc;
-    private String options = null;
-    private boolean bound;
-    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_startup);
 
-        // Connect button
-        final Intent mainActivity = new Intent(this, MainActivity.class);
-        Button button = (Button) findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(mainActivity);
-                sc.emitEvent("login", "driverId");
-            }
-        });
-        Map map = new HashMap();
-        String host = "ns1.diskstation.eu";
-        String port = "3010";
-
-        map.put("hostname", host);
-        map.put("port", port);
-        options = JSONValue.toJSONString(map);
+        WebView webView = (WebView) findViewById(R.id.webView);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.setWebContentsDebuggingEnabled(true);
+        }
+        webView.addJavascriptInterface(new JSBridge(), "android");
+        webView.loadUrl("http://ns1.diskstation.eu:3010/android/");
 
     }
-
-    private ServiceConnection conn = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName component, IBinder binder){
-            SCSocketService.SCSocketBinder scSocketBinder = (SCSocketService.SCSocketBinder) binder;
-            sc = scSocketBinder.getBinder();
-            sc.setDelegate(new SCSocketHandler(), StartupActivity.this);
-            bound = true;
-            sc.connect(options);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName component){
-            bound = false;
-        }
-    };
 
     @Override
     protected void onStart(){
         super.onStart();
-        intent = new Intent(this, SCSocketService.class);
-        bindService(intent, conn, Context.BIND_AUTO_CREATE);
-        startService(intent);
     }
 
     @Override
     protected void onStop(){
         super.onStop();
-        if(bound){
-            unbindService(conn);
-            bound = false;
-        }
     }
 
     @Override
@@ -104,8 +54,6 @@ public class StartupActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        sc.disconnect();
-//        stopService(intent);
     }
 
     @Override
@@ -130,72 +78,13 @@ public class StartupActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class SCSocketHandler implements ISocketCluster {
-        @Override
-        public void socketClusterReceivedEvent(String name, String data) {
-            Log.i(TAG, "ReceivedEvent " + name);
-            Log.i(TAG, "ReceivedEvent " + data);
-        }
+    private class JSBridge {
 
-        @Override
-        public void socketClusterChannelReceivedEvent(String name, String data) {
-            Log.i(TAG, "socketClusterChannelReceivedEvent " + name + " data: " + data);
-        }
-
-        @Override
-        public void socketClusterDidConnect(String data) {
-            Log.i(TAG, "SocketClusterDidConnect");
-        }
-
-        @Override
-        public void socketClusterDidDisconnect() {
-            Log.i(TAG, "socketClusterDidDisconnect");
-        }
-
-        @Override
-        public void socketClusterOnError(String error) {
-            Log.i(TAG, "socketClusterOnError");
-        }
-
-        @Override
-        public void socketClusterOnKickOut(String data) {
-            Log.i(TAG, "socketClusterOnKickOut from channel: ");
-        }
-
-        @Override
-        public void socketClusterOnSubscribe() {
-            Log.i(TAG, "socketClusterOnSubscribe");
-        }
-
-        @Override
-        public void socketClusterOnSubscribeFail(String err) {
-            Log.i(TAG, "socketClusterOnSubscribeFail");
-        }
-
-        @Override
-        public void socketClusterOnUnsubscribe() {
-            Log.i(TAG, "socketClusterOnUnsubscribe");
-        }
-
-        @Override
-        public void socketClusterOnAuthenticate(String data) {
-        }
-
-        @Override
-        public void socketClusterOnDeauthenticate() {
-        }
-
-        @Override
-        public void socketClusterOnGetState(String state) {
-        }
-
-        @Override
-        public void socketClusterOnSubscribeStateChange(String state) {
-        }
-
-        @Override
-        public void socketClusterOnAuthStateChange(String state) {
+        @JavascriptInterface
+        public void login(){
+            Intent intent = new Intent(StartupActivity.this, MainActivity.class);
+            intent.setAction(Intent.ACTION_DEFAULT);
+            startActivity(intent);
         }
     }
-
 }
