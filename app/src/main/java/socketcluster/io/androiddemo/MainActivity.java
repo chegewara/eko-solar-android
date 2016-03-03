@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -21,12 +20,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.simple.JSONValue;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private LocationManager locationManager;
     private Intent chatheadService;
     private String options;
+    private EventMsgHandler mEventsMsgHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
         chatheadService = new Intent(getApplicationContext(), ChatHeadService.class);
         startService(chatheadService);
+
+        mEventsMsgHandler = new EventMsgHandler();
+        mEventsMsgHandler.setService(scSocket);
 
         Map map = new HashMap();
 
@@ -169,13 +168,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onResume(){
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(mEventsMsgHandler,
                 new IntentFilter("io.socketcluster.eventsreceiver"));
     }
 
     @Override
     protected void onPause(){
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mEventsMsgHandler);
         super.onPause();
     }
 
@@ -307,63 +306,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 //  if(!logout)
                 //    scSocket.authenticate(authToken);
                 Log.d(TAG, "disconnected");
-                break;
-
-            case SCSocketService.EVENT_ON_EVENT_MESSAGE:
-                Log.d(TAG, "onEvent: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_SUBSCRIBED_MESSAGE:
-                JSONObject jsonObject = null;
-                String channel;
-                String text;
-                try {
-                    jsonObject = new JSONObject(data);
-                    channel = jsonObject.getString("channel");
-                    text = jsonObject.getString("data");
-                    String afterDecode = URLDecoder.decode(text, "UTF-8");
-                    Uri uri = Uri.parse(afterDecode);
-                    String contact = uri.getQueryParameter("contact");
-                    Log.d(TAG,jsonObject.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                Log.d(TAG, "subscribed message: "+jsonObject);
-                break;
-
-            case SCSocketService.EVENT_ON_AUTHENTICATE_STATE_CHANGE:
-                Log.d(TAG, "authStateChanged: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_SUBSCRIBE_STATE_CHANGE:
-                Log.d(TAG, "subscribeStateChanged: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_ERROR:
-                Log.d(TAG, "error: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_SUBSCRIBE_FAIL:
-                Log.d(TAG, "subscribeFailed: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_AUTHENTICATE:
-                //authToken = data;
-                Log.d(TAG, "authenticated: ");
-                break;
-
-            case SCSocketService.EVENT_ON_DEAUTHENTICATE:
-                Log.d(TAG, "error: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_SUBSCRIBE:
-                Log.d(TAG, "error: "+data);
-                break;
-
-            case SCSocketService.EVENT_ON_UNSUBSCRIBE:
-                Log.d(TAG, "error: "+data);
                 break;
 
         }
