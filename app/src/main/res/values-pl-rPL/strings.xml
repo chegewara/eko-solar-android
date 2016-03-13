@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Logistyka</string>
+
+    <string name="action_settings">Ustawienia</string>
+    <string name="title_activity_startup">MainActivity</string>
+
+    <string name="address_details">Adres zlecenia</string>
+    <string name="contact_details">Telefon kontaktowy</string>
+    <string name="job_type_details">Rodzaj zlecenia</string>
+    <string name="cash_details">Gotówka do pobrania</string>
+    <string name="info_details">Uwagi</string>
+    <string name="navi_details">Nawigacja</string>
+    <string name="ended_details">Zakończone</string>
+    <string name="not_ended_details">Nie zakończone</string>
+    <string name="size_details">Rozmiar kontenera</string>
+    <string name="ok">Zakończ</string>
+    <string name="cancel">Anuluj</string>
+    <string name="end_job_dialog">Zakończ zlecenie</string>
+    <string name="type_details">Typ</string>
+    <string name="server_address">ns1.diskstation.eu</string>
+    <string name="server_port">3010</string>
+    <string name="pref_title_port_server">Port serwera</string>
+    <string name="pref_title_address_server">Adres serwera</string>
+
+</resources>

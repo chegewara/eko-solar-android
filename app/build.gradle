@@ -29,8 +29,8 @@ android {
     compileSdkVersion 23
     buildToolsVersion '23.0.2'
     defaultConfig {
-        applicationId "socketcluster.io.androiddemo"
-        minSdkVersion 19
+        applicationId 'eu.eko_solar.logistyka'
+        minSdkVersion 17
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -46,6 +46,9 @@ android {
     compileOptions {
     }
 }
+
+
+
 
 
 

@@ -25,21 +25,26 @@ import java.util.Map;
 
 
 public class SCSocketService extends Service {
+    @Override
+    public void onDestroy() {
+        webView = null;
+        super.onDestroy();
+    }
 
     public static final String EVENT_ON_READY = "ready";
     public static final String EVENT_ON_CONNECT = "onConnect";
     public static final String EVENT_ON_DISCONNECT = "onDisconnect";
     public static final String EVENT_ON_EVENT_MESSAGE = "onEvent";
-    public static final String EVENT_ON_SUBSCRIBED_MESSAGE = "onMessage";
-    public static final String EVENT_ON_AUTHENTICATE_STATE_CHANGE = "onAuthStateChange";
-    public static final String EVENT_ON_SUBSCRIBE_STATE_CHANGE = "onSubscribeStateChange";
-    public static final String EVENT_ON_ERROR = "onError";
-    public static final String EVENT_ON_SUBSCRIBE_FAIL = "onSubscribeFail";
-    public static final String EVENT_ON_AUTHENTICATE = "onAuthenticate";
-    public static final String EVENT_ON_DEAUTHENTICATE = "onDeauthenticate";
     public static final String EVENT_ON_SUBSCRIBE = "onSubscribe";
     public static final String EVENT_ON_UNSUBSCRIBE = "onUnsubscribe";
+    public static final String EVENT_ON_SUBSCRIBED_MESSAGE = "onMessage";
+    public static final String EVENT_ON_SUBSCRIBE_STATE_CHANGE = "onSubscribeStateChange";
+    public static final String EVENT_ON_SUBSCRIBE_FAIL = "onSubscribeFail";
     public static final String EVENT_ON_KICKOUT = "onKickOut";
+    public static final String EVENT_ON_AUTHENTICATE = "onAuthenticate";
+    public static final String EVENT_ON_DEAUTHENTICATE = "onDeauthenticate";
+    public static final String EVENT_ON_AUTHENTICATE_STATE_CHANGE = "onAuthStateChange";
+    public static final String EVENT_ON_ERROR = "onError";
 
     private WebView webView;
     private WebViewJavascriptBridge bridge;
@@ -57,8 +62,15 @@ public class SCSocketService extends Service {
     public IBinder onBind(Intent intent){
         return binder;
     }
+
     @Override
     public void onCreate(){
+        stopSelf();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_NOT_STICKY;
     }
 
     public void setDelegate(Context delegate) {
@@ -418,6 +430,7 @@ public class SCSocketService extends Service {
 
         /** TODO
          * This is only example how to handle events with notifications and can be removed
+         *
 
          final int NOTIFICATION_ID = 1;
          NotificationManager mNotificationManager;
@@ -442,7 +455,8 @@ public class SCSocketService extends Service {
          .setAutoCancel(true);
 
          mBuilder.setContentIntent(contentIntent);
-         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());*/
+         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+         */
     }
 
 }

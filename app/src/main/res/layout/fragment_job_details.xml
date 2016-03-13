@@ -1,13 +1,169 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="socketcluster.io.androiddemo.JobDetailsFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    android:theme="@style/AppTheme1"
+    android:orientation="vertical"
+    tools:context=".JobDetailsFragment">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1">
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/address_details"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentStart="false"
+        android:textSize="24sp" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/address_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/address_details"
+        android:layout_alignTop="@+id/textView"
+        android:textSize="24dp"
+        android:layout_toEndOf="@+id/textView6"
+        android:layout_marginLeft="25dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/contact_details"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textView2"
+        android:textSize="24dp"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/contact_details" />
+
+    <TextView
+        android:id="@+id/contact_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/contact_details"
+        android:layout_alignTop="@+id/textView2"
+        android:layout_alignStart="@+id/address_detail"
+        android:textSize="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/job_type_details"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textView3"
+        android:textSize="24dp"
+        android:layout_alignEnd="@+id/textView4"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/job_type_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/job_type_details"
+        android:layout_alignTop="@+id/textView3"
+        android:layout_alignStart="@+id/contact_details"
+        android:textSize="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/info_details"
+        android:id="@+id/textView5"
+        android:textSize="24dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/textView6"
+        android:layout_alignEnd="@+id/textView4"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/info_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/info_details"
+        android:textSize="24dp"
+        android:layout_alignTop="@+id/textView5"
+        android:layout_alignParentEnd="true"
+        android:layout_alignStart="@+id/size_details"
+        android:layout_above="@+id/not_ended_details" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/size_details"
+        android:layout_below="@+id/textView3"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textView4"
+        android:textSize="24dp"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/size_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/size_details"
+        android:layout_alignTop="@+id/textView4"
+        android:layout_alignStart="@+id/contact_details"
+        android:textSize="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cash_details"
+        android:id="@+id/textView6"
+        android:textSize="24dp"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="25dp"
+        android:layout_alignEnd="@+id/not_ended_details" />
+
+    <TextView
+        android:id="@+id/cash_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cash_details"
+        android:textSize="24sp"
+        android:layout_alignTop="@+id/textView6"
+        android:layout_toEndOf="@+id/textView6"
+        android:layout_alignStart="@+id/info_details" />
+</RelativeLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:layout_above="@+id/textView3"
+        android:layout_alignParentStart="false">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/ended_details"
+            android:id="@+id/ended_details"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/not_ended_details"
+            android:id="@+id/not_ended_details"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/ended_details"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="@string/navi_details"
+            android:id="@+id/navi_details"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/not_ended_details"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</LinearLayout>
